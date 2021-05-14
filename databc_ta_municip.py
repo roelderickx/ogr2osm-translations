@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 '''
 A translation function for DataBC TA_MUNICIP city data. 
 '''

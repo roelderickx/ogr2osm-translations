@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 '''
 A translation function for Township of Langley Roads_shp.shp roads data. 
 
@@ -48,77 +50,80 @@ ROADTYPE=Major Road Network             highway=secondary                   Does
 ROADTYPE=Highway Ramp                   highway=motorway_link
 '''
 
-def translateName(rawname):
-    '''
-    A general purpose name expander.
-    '''
-    suffixlookup = {
-    'Ave':'Avenue',
-    'Rd':'Road',
-    'St':'Street',
-    'Pl':'Place',
-    'Cres':'Crescent',
-    'Blvd':'Boulevard',
-    'Dr':'Drive',
-    'Lane':'Lane',
-    'Crt':'Court',
-    'Gr':'Grove',
-    'Cl':'Close',
-    'Rwy':'Railway',
-    'Div':'Diversion',
-    'Hwy':'Highway',
-    'Hwy':'Highway',
-    'Conn': 'Connector',
-    'E':'East',
-    'S':'South',
-    'N':'North',
-    'W':'West'}
-	
-    newName = ''
-    for partName in rawname.split():
-        newName = newName + ' ' + suffixlookup.get(partName,partName)
+import ogr2osm
 
-    return newName.strip()
+class LangleyRoadTranslation(ogr2osm.TranslationBase):
+    def translateName(self, rawname):
+        '''
+        A general purpose name expander.
+        '''
+        suffixlookup = {
+        'Ave':'Avenue',
+        'Rd':'Road',
+        'St':'Street',
+        'Pl':'Place',
+        'Cres':'Crescent',
+        'Blvd':'Boulevard',
+        'Dr':'Drive',
+        'Lane':'Lane',
+        'Crt':'Court',
+        'Gr':'Grove',
+        'Cl':'Close',
+        'Rwy':'Railway',
+        'Div':'Diversion',
+        'Hwy':'Highway',
+        'Hwy':'Highway',
+        'Conn': 'Connector',
+        'E':'East',
+        'S':'South',
+        'N':'North',
+        'W':'West'}
+	    
+        newName = ''
+        for partName in rawname.split():
+            newName = newName + ' ' + suffixlookup.get(partName,partName)
 
-    
-def filterTags(attrs):
-    if not attrs:
-        return
-    tags = {}
-    
-    if 'ROADNAME' in attrs:
-        translated = translateName(attrs['ROADNAME'].title())
-        if translated != '(Lane)' and translated != '(Ramp)':
-            tags['name'] = translated
-        
-    if 'STREETID' in attrs:
-        tags['tol:streetid'] = attrs['STREETID'].strip()
-        
-    if 'ROADTYPE' in attrs:
-        if attrs['ROADTYPE'].strip() == 'Major Road Network':
-            tags['highway'] = 'secondary'
-        elif attrs['ROADTYPE'].strip() == 'Arterial':
-            tags['highway'] = 'secondary'
-        elif attrs['ROADTYPE'].strip() == 'Collector':
-            tags['highway'] = 'tertiary'
-        elif attrs['ROADTYPE'].strip() == 'Local':
-            tags['highway'] = 'residential'
-        elif attrs['ROADTYPE'].strip() == 'Lane':
-            tags['highway'] = 'service'
-        elif attrs['ROADTYPE'].strip() == 'Gravel':
-            tags['highway'] = 'residential'
-            tags['surface'] = 'gravel'
-        elif attrs['ROADTYPE'].strip() == 'Ministry of Transportation':
-            if translated and (translated == '#1 Highway' or translated == 'Golden Ears Bridge'):
-                tags['highway'] = 'motorway'
+        return newName.strip()
+
+
+    def filter_tags(self, attrs):
+        if not attrs:
+            return
+        tags = {}
+
+        if 'ROADNAME' in attrs:
+            translated = self.translateName(attrs['ROADNAME'].title())
+            if translated != '(Lane)' and translated != '(Ramp)':
+                tags['name'] = translated
+
+        if 'STREETID' in attrs:
+            tags['tol:streetid'] = attrs['STREETID'].strip()
+
+        if 'ROADTYPE' in attrs:
+            if attrs['ROADTYPE'].strip() == 'Major Road Network':
+                tags['highway'] = 'secondary'
+            elif attrs['ROADTYPE'].strip() == 'Arterial':
+                tags['highway'] = 'secondary'
+            elif attrs['ROADTYPE'].strip() == 'Collector':
+                tags['highway'] = 'tertiary'
+            elif attrs['ROADTYPE'].strip() == 'Local':
+                tags['highway'] = 'residential'
+            elif attrs['ROADTYPE'].strip() == 'Lane':
+                tags['highway'] = 'service'
+            elif attrs['ROADTYPE'].strip() == 'Gravel':
+                tags['highway'] = 'residential'
+                tags['surface'] = 'gravel'
+            elif attrs['ROADTYPE'].strip() == 'Ministry of Transportation':
+                if translated and (translated == '#1 Highway' or translated == 'Golden Ears Bridge'):
+                    tags['highway'] = 'motorway'
+                else:
+                    tags['highway'] = 'primary'
+            elif attrs['ROADTYPE'].strip() == 'Highway Ramp':
+                tags['highway'] = 'motorway_link'
             else:
-                tags['highway'] = 'primary'
-        elif attrs['ROADTYPE'].strip() == 'Highway Ramp':
-            tags['highway'] = 'motorway_link'
-        else:
-            tags['highway'] = 'road'
-            tags['tol:roadtype'] = attrs['ROADTYPE'].strip()
-            
-        tags['source'] = 'Township of Langley GIS Data'
+                tags['highway'] = 'road'
+                tags['tol:roadtype'] = attrs['ROADTYPE'].strip()
 
-    return tags
+            tags['source'] = 'Township of Langley GIS Data'
+
+        return tags
