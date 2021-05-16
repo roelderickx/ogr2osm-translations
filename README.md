@@ -13,7 +13,7 @@ The translation files currently in use for pnorman's version can not immediately
 This means you need to modify your translation file, but in most cases this is straightforward. The steps below will guide you through the conversion, langleyroad.py is taken as an example:
 
 - At the top of the translation file you need to add `import ogr2osm`
-- Next, you need to define a class. It's name is not important as long as it is a subclass of `ogr2osm.TranslationBase`.
+- Next, you need to define a class. The name is not important as long as it is a subclass of `ogr2osm.TranslationBase`.
   For example `class LangleyRoadTranslation(ogr2osm.TranslationBase):`
 - Indent the rest of your file to make it part of the class and add the self parameter to all functions. This means the defintion of the translateName function will become `def translateName(self, rawname):`
 - Search all calls to these functions and replace them with a call to the class method. The line `translated = translateName(attrs['ROADNAME'].title())` will become `translated = self.translateName(attrs['ROADNAME'].title())`.
