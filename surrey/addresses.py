@@ -56,7 +56,7 @@ class LangleyRoadTranslation(ogr2osm.TranslationBase):
             tags['addr:housenumber'] = attrs['HOUSE_NO'].strip(' ')
 
         # This assumes every address will have a road name
-        tags['addr:street'] = ' '.join([ self.ffixlookup.get(part.title(), part) \
+        tags['addr:street'] = ' '.join([ self.affixlookup.get(part.title(), part) \
                                              for part in attrs['ROAD_NAME'].split() ])
 
         #Add city-wide addressing info
